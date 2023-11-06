@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("..")
+
 import os
 import matplotlib.image as mpimg
 import cv2
@@ -5,7 +9,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 
-from utils import num2char, char2num
+from utils import char2num
 
 
 class Dataset:

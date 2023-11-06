@@ -1,13 +1,3 @@
-from torchvision import transforms
-
-to_pil = transforms.ToPILImage()
-
-
-def show_img(img):
-    pic = to_pil(img)
-    pic.show()
-
-
 # '0-9' 48-57 => -48 => 0-9
 # 'A-Z' 65-90 => -55 => 10-35
 # 'a-z' 97-122 => -61 => 36-61
@@ -40,15 +30,3 @@ def char2num(char) -> int:
         num -= 61
         return num
     return -1
-
-
-def get_sec(e, s) -> float:
-    return int((e - s) * 1000) / 1000.0
-
-
-def get_ms(e, s) -> int:
-    return int((e - s) * 1000)
-
-
-def get_percent(p) -> float:
-    return int(p * 100 * 100) / 100.0

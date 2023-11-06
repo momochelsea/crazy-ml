@@ -1,5 +1,8 @@
-import torch
+import sys
 
+sys.path.append("..")
+
+import torch
 
 from dataset import Dataset
 from utils import num2char

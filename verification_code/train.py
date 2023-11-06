@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("..")
+
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -70,7 +74,7 @@ def test(logic, test_ds):
 
 # 读取数据集
 DS_PATH = "../dataset/"
-epochs = 20
+epochs = 200
 batch_size = 32
 learning_rate = 0.001
 
