@@ -11,11 +11,11 @@ from time import time
 
 
 from dataset import Dataset
-from model import VerifyCode
+from module import VerifyCode
 from utils import get_sec, get_ms, get_percent, num2char, char2num, show_img
 
 
-def train(epochs, logic, optimizer, train_dl):
+def train(epochs, model, optimizer, train_dl):
     stime = time()
 
     for epoch in range(epochs):
@@ -32,7 +32,7 @@ def train(epochs, logic, optimizer, train_dl):
 
             xb = torch.unsqueeze(xb, 1)
 
-            y_pred = logic(xb)
+            y_pred = model(xb)
             # print(type(y_pred), y_pred.shape)
 
             loss = F.cross_entropy(y_pred, yb)
@@ -52,14 +52,14 @@ def train(epochs, logic, optimizer, train_dl):
     print(f"cost: {ctime}s")
 
 
-def test(logic, test_ds):
+def test(model, test_ds):
     x, y = test_ds[:]
     x = torch.flatten(x, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
 
     x = torch.unsqueeze(x, 1)
 
-    y_pred = logic(x)
+    y_pred = model(x)
     # print(torch.argmax(y_pred[0:10], 1))
     # print(y[0:10])
     # print(torch.argmax(y[0:10]))
@@ -101,10 +101,10 @@ train_dl, _ = loader.read_dl(batch_size)
 in_channels = 1
 out_channels = 26 * 2 + 10
 
-logic = VerifyCode(in_channels, out_channels).get_model()
-optimizer = optim.SGD(logic.parameters(), lr=learning_rate)
+model = VerifyCode(in_channels, out_channels).get_model()
+optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
-train(epochs, logic, optimizer, train_dl)
-test(logic, test_ds)
+train(epochs, model, optimizer, train_dl)
+test(model, test_ds)
 
-torch.save(logic, "../model/verification_code.pt")
+torch.save(model, "../model/verification_code.pt")

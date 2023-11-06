@@ -15,9 +15,9 @@ img = torch.flatten(img, start_dim=0, end_dim=1)
 img = torch.unsqueeze(img, 1)
 print(img.shape)
 
-logic = torch.load("../model/verification_code.pt")
+model = torch.load("../model/verification_code.pt")
 
-code = logic(img)
+code = model(img)
 code = torch.argmax(code, dim=1)
 print(code)
 code = list(map(num2char, code))
