@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
+import math
 
 
 class FC(nn.Module):
@@ -55,10 +56,55 @@ class CNN(nn.Module):
 
 
 class VGG(nn.Module):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, width, archs, inputs, outputs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.device = torch.cuda.current_device()
+        self.seq = self.get_layers(width, archs, inputs, outputs)
+
+    def get_blocks(self, convs, inputs, outputs):
+        layers = []
+
+        for _ in range(convs):
+            layer = nn.Conv2d(
+                in_channels=inputs,
+                out_channels=outputs,
+                kernel_size=3,
+                padding=1,
+                bias=True,
+            )
+            layers.append(layer)
+            layers.append(nn.ReLU())
+            inputs = outputs
+
+        layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+
+        return nn.Sequential(*layers)
+
+    def get_layers(self, width, archs, inputs, outputs):
+        blocks = []
+
+        ipt = inputs
+        blk = len(archs)
+
+        for i in range(blk):
+            convs, opt = archs[i]
+            block = self.get_blocks(convs, ipt, opt)
+            blocks.append(block)
+            ipt = opt
+
+        width = math.floor(width / (2**blk))
+        return nn.Sequential(
+            *blocks,
+            nn.Flatten(start_dim=1),
+            nn.Linear(ipt * width * width, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, outputs)
+        )
 
     def get_model(self):
         me = self
@@ -68,4 +114,4 @@ class VGG(nn.Module):
         return me
 
     def forward(self, x):
-        pass
+        return self.seq(x)

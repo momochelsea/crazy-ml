@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 from utils import show_img
 
 # model = torch.load("../model/mnist_fc.pt")
-model = torch.load("../model/mnist_cnn.pt")
+# model = torch.load("../model/mnist_cnn.pt")
+model = torch.load("../model/mnist_vgg.pt")
 
 for i in range(10):
     filename = "../dataset/mnist/tests/" + str(i) + ".jpg"
@@ -27,7 +28,9 @@ for i in range(10):
     # show_img(file)
     # break
 
+    # FC
     # file = file.reshape(1, file.shape[0] * file.shape[1])
+    # CNN, VGG
     file = torch.reshape(file, (1, 1, file.shape[0], file.shape[1]))
 
     if torch.cuda.is_available():
