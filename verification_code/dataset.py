@@ -40,6 +40,8 @@ def char2num(char) -> int:
 
 class Dataset:
     def __init__(self, ds_path):
+        self.device = torch.cuda.current_device()
+
         self.ds_path = ds_path
         self.paths = [ds_path + name for name in os.listdir(ds_path)]
 
@@ -48,8 +50,16 @@ class Dataset:
         tests = np.random.randint(0, len(self.paths), 2000)
 
         # pick paths for train and test
-        train_paths = [self.paths[i] for i in range(len(self.paths)) if i not in tests]
-        test_paths = [self.paths[i] for i in range(len(self.paths)) if i in tests]
+        train_paths = [
+            self.paths[i]
+            for i in range(len(self.paths))
+            if i not in tests
+        ]
+        test_paths = [
+            self.paths[i]
+            for i in range(len(self.paths))
+            if i in tests
+        ]
 
         # get dataset for train and test
         x_train = self._get_x(train_paths)
@@ -79,6 +89,12 @@ class Dataset:
         y_train = torch.tensor(data["y_train"], dtype=torch.int64)
         x_test = torch.tensor(data["x_test"], dtype=torch.float32)
         y_test = torch.tensor(data["y_test"], dtype=torch.int64)
+
+        if torch.cuda.is_available():
+            x_train = x_train.to(self.device)
+            y_train = y_train.to(self.device)
+            x_test = x_test.to(self.device)
+            y_test = y_test.to(self.device)
 
         # print(x_train.shape, y_train.shape)
         # print(x_test.shape, y_test.shape)
