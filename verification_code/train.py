@@ -6,20 +6,10 @@ import numpy as np
 import pandas as pd
 from time import time
 
+
 from dataset import Dataset
 from model import VerifyCode
-
-
-def get_sec(e, s) -> float:
-    return int((e - s) * 1000) / 1000.0
-
-
-def get_ms(e, s) -> int:
-    return int((e - s) * 1000)
-
-
-def get_percent(p) -> float:
-    return int(p * 100 * 100) / 100.0
+from utils import get_sec, get_ms, get_percent, num2char, char2num, show_img
 
 
 def train(epochs, logic, optimizer, train_dl):
@@ -37,7 +27,7 @@ def train(epochs, logic, optimizer, train_dl):
             yb = torch.flatten(yb, start_dim=0, end_dim=1)
             # print(type(xb), type(yb), xb.shape, yb.shape)
 
-            xb = torch.swapdims(xb, 1, 3)
+            xb = torch.unsqueeze(xb, 1)
 
             y_pred = logic(xb)
             # print(type(y_pred), y_pred.shape)
@@ -61,7 +51,7 @@ def test(logic, test_ds):
     x, y = test_ds[:]
     x = torch.flatten(x, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
-    x = torch.swapdims(x, 1, 3)
+    x = torch.unsqueeze(x, 1)
 
     y_pred = logic(x)
     # print(torch.argmax(y_pred[0:10], 1))
@@ -74,44 +64,37 @@ def test(logic, test_ds):
 
 
 # 读取数据集
-DATESET_PATH = "../dataset/verification_code/"
+DS_PATH = "../dataset/"
 epochs = 5
 batch_size = 32
 learning_rate = 0.001
 
 
-loader = Dataset(DATESET_PATH)
+loader = Dataset(DS_PATH)
 # loader.rewrite_ds()
 
-# train_ds, test_ds = loader.read_ds()
-# print(train_ds, test_ds)
-# print(type(train_ds), type(test_ds))
+train_ds, test_ds = loader.read_ds()
 
 # x_train, y_train = train_ds[:]
 # x_test, y_test = test_ds[:]
-
-# print(type(x_train), x_train.shape)
-# print(type(y_train), y_train.shape)
+# print("ds shape: ", x_train.shape, y_train.shape)
 # print(y_train[0])
 
-_, test_ds = loader.read_ds()
 train_dl, _ = loader.read_dl(batch_size)
-print(train_dl, test_ds)
-print(type(train_dl), type(test_ds))
 
 # print(test_ds[0][0].shape, test_ds[0][1].shape)
-img = test_ds[0][0].cpu()
-code = test_ds[0][1].cpu()
-img = np.swapaxes(img, 1, 3)
-print(img[0], code[0])
+# img = test_ds[0][0].cpu()
+# code = test_ds[0][1].cpu()
+# for i in range(img.shape[0]):
+#     print(img[i].shape, num2char(code[i].item()))
+#     show_img(img[i])
 
-
-in_channels = 3
+in_channels = 1
 out_channels = 26 * 2 + 10
 
 logic = VerifyCode(in_channels, out_channels).get_model()
 optimizer = optim.SGD(logic.parameters(), lr=learning_rate)
 
-# train(epochs, logic, optimizer, train_dl)
-# accuracy = get_percent(test(logic, test_ds))
-# print(f"accuracy: {accuracy}%")
+train(epochs, logic, optimizer, train_dl)
+accuracy = get_percent(test(logic, test_ds))
+print(f"accuracy: {accuracy}%")

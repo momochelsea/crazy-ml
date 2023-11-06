@@ -1,65 +1,28 @@
 import os
 import matplotlib.image as mpimg
+import cv2
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 
-# '0-9' 48-57 => -48 => 0-9
-# 'A-Z' 65-90 => -55 => 10-35
-# 'a-z' 97-122 => -61 => 36-61
-
-
-def num2char(num) -> str:
-    if num >= 0 and num <= 9:
-        num += 48
-        return chr(num)
-    if num >= 10 and num <= 35:
-        num += 55
-        return chr(num)
-    if num >= 36 and num <= 61:
-        num += 61
-        return chr(num)
-    return ""
-
-
-def char2num(char) -> int:
-    num = ord(char)
-    # print(char, num)
-
-    if num >= 48 and num <= 57:
-        num -= 48
-        return num
-    if num >= 65 and num <= 90:
-        num -= 55
-        return num
-    if num >= 97 and num <= 122:
-        num -= 61
-        return num
-    return -1
+from utils import num2char, char2num
 
 
 class Dataset:
-    def __init__(self, ds_path):
+    def __init__(self, npz_path):
         self.device = torch.cuda.current_device()
 
-        self.ds_path = ds_path
-        self.paths = [ds_path + name for name in os.listdir(ds_path)]
+        self.npz_path = npz_path
+        self.ds_path = npz_path + "verification_code/"
+        self.paths = [self.ds_path + name for name in os.listdir(self.ds_path)]
 
     def rewrite_ds(self):
         # random for test dataset
         tests = np.random.randint(0, len(self.paths), 2000)
 
         # pick paths for train and test
-        train_paths = [
-            self.paths[i]
-            for i in range(len(self.paths))
-            if i not in tests
-        ]
-        test_paths = [
-            self.paths[i]
-            for i in range(len(self.paths))
-            if i in tests
-        ]
+        train_paths = [self.paths[i] for i in range(len(self.paths)) if i not in tests]
+        test_paths = [self.paths[i] for i in range(len(self.paths)) if i in tests]
 
         # get dataset for train and test
         x_train = self._get_x(train_paths)
@@ -71,7 +34,7 @@ class Dataset:
         # print(x_test.shape, y_test.shape)
 
         np.savez(
-            self.ds_path + "verification_code.npz",
+            self.npz_path + "verification_code.npz",
             x_train=x_train,
             y_train=y_train,
             x_test=x_test,
@@ -79,7 +42,7 @@ class Dataset:
         )
 
     def read_ds(self):
-        data = np.load(self.ds_path + "verification_code.npz")
+        data = np.load(self.npz_path + "verification_code.npz")
         # print(data["x_train"].shape, data["y_train"].shape)
         # print(data["x_test"].shape, data["y_test"].shape)
         # print(type(data["x_train"]), type(data["y_train"]))
@@ -112,7 +75,7 @@ class Dataset:
     def _get_x(self, paths):
         return np.array(
             [
-                np.split(np.array(mpimg.imread(path)), 5, axis=1)
+                np.split(np.array(cv2.imread(path, cv2.IMREAD_GRAYSCALE)), 5, axis=1)
                 for path in paths
                 # if path[-9:] == "00175.jpg"
                 if path[-3:] == "jpg"
@@ -131,9 +94,9 @@ class Dataset:
 
 
 if __name__ == "__main__":
-    DATESET_PATH = "../dataset/verification_code/"
+    DS_PATH = "../dataset/"
 
-    loader = Dataset(DATESET_PATH)
+    loader = Dataset(DS_PATH)
     # loader.rewrite_ds()
 
     train_ds, test_ds = loader.read_ds()
