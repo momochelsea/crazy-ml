@@ -49,6 +49,5 @@ class VerifyCode(nn.Module):
         # print("layer3", l3.shape, l3r.shape)
 
         p3 = l3r
-        # p3 = p2f
 
         return self.layer4(p3)

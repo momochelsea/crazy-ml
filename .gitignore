@@ -191,4 +191,11 @@ Temporary Items
 #######################################################
 
 dataset
+model
 demo.*
+
+*.zip
+*.rar
+*.tar.gz
+*.bz
+*.bz2

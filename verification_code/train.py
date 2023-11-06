@@ -3,7 +3,6 @@ from torch import nn
 from torch.nn import functional as F
 from torch import optim
 import numpy as np
-import pandas as pd
 from time import time
 
 
@@ -44,13 +43,16 @@ def train(epochs, logic, optimizer, train_dl):
                 sstime = time()
 
     ctime = get_sec(time(), stime)
-    print(f"\nloss: {loss}\ncost: {ctime}s\n")
+    print("===========================")
+    print(f"loss: {loss}")
+    print(f"cost: {ctime}s")
 
 
 def test(logic, test_ds):
     x, y = test_ds[:]
     x = torch.flatten(x, start_dim=0, end_dim=1)
     y = torch.flatten(y, start_dim=0, end_dim=1)
+
     x = torch.unsqueeze(x, 1)
 
     y_pred = logic(x)
@@ -60,12 +62,15 @@ def test(logic, test_ds):
 
     accuracy = torch.argmax(y_pred, 1) == y
     accuracy = np.mean(accuracy.cpu().numpy())
+
+    print(f"accuracy: {get_percent(accuracy)}%")
+
     return accuracy
 
 
 # 读取数据集
 DS_PATH = "../dataset/"
-epochs = 5
+epochs = 20
 batch_size = 32
 learning_rate = 0.001
 
@@ -80,14 +85,14 @@ train_ds, test_ds = loader.read_ds()
 # print("ds shape: ", x_train.shape, y_train.shape)
 # print(y_train[0])
 
-train_dl, _ = loader.read_dl(batch_size)
-
 # print(test_ds[0][0].shape, test_ds[0][1].shape)
 # img = test_ds[0][0].cpu()
 # code = test_ds[0][1].cpu()
 # for i in range(img.shape[0]):
 #     print(img[i].shape, num2char(code[i].item()))
 #     show_img(img[i])
+
+train_dl, _ = loader.read_dl(batch_size)
 
 in_channels = 1
 out_channels = 26 * 2 + 10
@@ -96,5 +101,6 @@ logic = VerifyCode(in_channels, out_channels).get_model()
 optimizer = optim.SGD(logic.parameters(), lr=learning_rate)
 
 train(epochs, logic, optimizer, train_dl)
-accuracy = get_percent(test(logic, test_ds))
-print(f"accuracy: {accuracy}%")
+test(logic, test_ds)
+
+torch.save(logic, "../model/verification_code.pt")

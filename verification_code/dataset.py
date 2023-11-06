@@ -16,6 +16,12 @@ class Dataset:
         self.ds_path = npz_path + "verification_code/"
         self.paths = [self.ds_path + name for name in os.listdir(self.ds_path)]
 
+    def read_img(self, name):
+        img = self._get_x([self.ds_path + name])
+        img = torch.tensor(img, dtype=torch.float32, device=self.device)
+
+        return img
+
     def rewrite_ds(self):
         # random for test dataset
         tests = np.random.randint(0, len(self.paths), 2000)
@@ -32,6 +38,11 @@ class Dataset:
 
         # print(x_train.shape, y_train.shape)
         # print(x_test.shape, y_test.shape)
+
+        # x_train = torch.tensor(x_train, dtype=torch.float32)
+        # y_train = torch.tensor(y_train, dtype=torch.int64)
+        # x_test = torch.tensor(x_test, dtype=torch.float32)
+        # y_test = torch.tensor(y_test, dtype=torch.int64)
 
         np.savez(
             self.npz_path + "verification_code.npz",
@@ -97,7 +108,7 @@ if __name__ == "__main__":
     DS_PATH = "../dataset/"
 
     loader = Dataset(DS_PATH)
-    # loader.rewrite_ds()
+    loader.rewrite_ds()
 
     train_ds, test_ds = loader.read_ds()
     print(train_ds, test_ds)
