@@ -34,8 +34,7 @@ def train(epochs, module, optimizer, train_dl):
                 print(f"{i} loss: {loss}")
 
         print(f"\nEpoch {epoch+1}: loss: {loss}\n")
-
-    torch.save(module, "../model/mnist_vgg.pt")
+        torch.save(module, "../model/mnist_vgg.pt")
 
 
 def test(model, test_ds):
@@ -63,6 +62,8 @@ lr = 0.0005
 loader = dataset.Loader(input_path=input_path)
 train_ds, test_ds = loader.get_ds()
 train_dl, test_dl = loader.get_dl(bs)
+
+print("ds shape", train_ds[0][0].shape, train_ds[0][1].shape)
 
 module = module.VGG(28, ((1, 64), (1, 128)), 1, 10).get_model()
 optimizer = optim.SGD(module.parameters(), lr=lr)

@@ -26,19 +26,26 @@ class FC(nn.Module):
         return self.layer2(t1r)
 
 
-class CNN(nn.Module):
+class LeNet(nn.Module):
     def __init__(self, inputs, outputs, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.device = torch.cuda.current_device()
-
+        # 1x28*28 => 6@1x5*5 => 6x28*28
         self.layer1 = nn.Conv2d(
-            inputs, 256, kernel_size=3, padding=1, stride=1, bias=True
+            inputs, 6, kernel_size=5, padding=2, stride=1, bias=True
         )
+        # 6x28*28 / 2 => 6x14*14
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.layer2 = nn.Conv2d(256, 64, kernel_size=2, padding=1, stride=1, bias=True)
+
+        # 6x14*14 => 16@6x5*5 => 16x14*14
+        self.layer2 = nn.Conv2d(6, 16, kernel_size=5, padding=2, stride=1, bias=True)
+        # 16x14*14 / 2 => 16x7*7
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.fc1 = nn.Linear(64 * 7 * 7, outputs, bias=True)
+
+        self.fc1 = nn.Linear(16 * 7 * 7, 120, bias=True)
+        self.fc2 = nn.Linear(120, 84, bias=True)
+        self.fc3 = nn.Linear(84, outputs, bias=True)
 
     def get_model(self):
         me = self
@@ -51,8 +58,11 @@ class CNN(nn.Module):
         t1 = self.pool1(F.relu(self.layer1(x)))
         t2 = self.pool2(F.relu(self.layer2(t1)))
         tt = torch.flatten(t2, start_dim=1)
+        f1 = self.fc1(tt)
+        f2 = self.fc2(f1)
+        f3 = self.fc3(f2)
 
-        return self.fc1(tt)
+        return f3
 
 
 class VGG(nn.Module):

@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from utils import show_img
 
 # model = torch.load("../model/mnist_fc.pt")
-# model = torch.load("../model/mnist_cnn.pt")
+# model = torch.load("../model/mnist_lenet.pt")
 model = torch.load("../model/mnist_vgg.pt")
 
 for i in range(10):
@@ -30,7 +30,7 @@ for i in range(10):
 
     # FC
     # file = file.reshape(1, file.shape[0] * file.shape[1])
-    # CNN, VGG
+    # LeNet, VGG
     file = torch.reshape(file, (1, 1, file.shape[0], file.shape[1]))
 
     if torch.cuda.is_available():

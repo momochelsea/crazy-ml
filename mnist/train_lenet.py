@@ -34,8 +34,7 @@ def train(epochs, module, optimizer, train_dl):
                 print(f"{i} loss: {loss}")
 
         print(f"\nEpoch {epoch+1}: loss: {loss}\n")
-
-    torch.save(module, "../model/mnist_cnn.pt")
+        torch.save(module, "../model/mnist_lenet.pt")
 
 
 def test(model, test_ds):
@@ -64,7 +63,9 @@ loader = dataset.Loader(input_path=input_path)
 train_ds, test_ds = loader.get_ds()
 train_dl, test_dl = loader.get_dl(bs)
 
-module = module.CNN(1, 10).get_model()
+print("ds shape", train_ds[0][0].shape, train_ds[0][1].shape)
+
+module = module.LeNet(1, 10).get_model()
 optimizer = optim.SGD(module.parameters(), lr=lr)
 
 train(epochs, module, optimizer, train_dl)
